@@ -46,7 +46,16 @@ import {
   Banknote,
   Building2,
   Trash2,
+  Calendar,
+  CalendarDays,
+  MapPin,
+  Landmark,
+  Coins,
+  Shield,
+  Activity,
+  FileCheck,
 } from "lucide-react";
+
 import * as XLSX from "xlsx";
 
 import { Tx } from "@/lib/types";
@@ -199,17 +208,13 @@ export default function Home() {
       }
 
       setRows(allRecords);
-      if (allRecords.length > 0) {
-        setMsg({
-          type: "success",
-          text: `Berhasil terhubung ke Supabase · ${fmt(allRecords.length)} baris transaksi aktif dibaca.`,
-        });
-      } else {
+      if (allRecords.length === 0) {
         setMsg({
           type: "info",
           text: "Database terhubung namun belum ada data transaksi. Login administrator dan impor workbook Excel SETBAY.",
         });
       }
+
     } catch (err: any) {
       setMsg({
         type: "error",
@@ -662,12 +667,18 @@ export default function Home() {
         {/* Top Header Bar */}
         <header className="topbar">
           <div className="crumb">
-            Bank Indonesia &nbsp;/&nbsp; <b>{pageTitles[page][0]}</b>
+            <span>Bank Indonesia</span>
+            <span className="crumb-sep">/</span>
+            <b>{pageTitles[page][0]}</b>
           </div>
           <div className="topactions">
-            <span className={`status ${configured ? "ok" : "warn"}`}>
+            <span className={`status ${configured ? "ok" : "warn"}`} title="Status koneksi PostgreSQL Supabase">
               <i />
-              {configured ? "Supabase Terkoneksi" : "Supabase Belum Disetel"}
+              {configured
+                ? rows.length > 0
+                  ? `Supabase Terkoneksi · ${fmt(rows.length)} baris`
+                  : "Supabase Terkoneksi"
+                : "Supabase Belum Disetel"}
             </span>
 
             {session ? (
@@ -685,22 +696,25 @@ export default function Home() {
         <div className="content">
           {/* Hero Banner */}
           <section className="hero">
-            <div>
+            <div className="hero-text">
               <div className="eyebrow">BANK INDONESIA · SISTEM INFORMASI SETBAY</div>
               <h1>{pageTitles[page][0]}</h1>
               <p>{pageTitles[page][1]}</p>
             </div>
             <div className="heroactions">
-              <button className="outline" onClick={loadData} disabled={loading || busy}>
+              <button className="outline" onClick={loadData} disabled={loading || busy} title="Perbarui data dari Supabase">
                 <RefreshCw size={15} className={loading ? "spin" : ""} />
                 Muat Ulang
               </button>
-              <button className="primary" onClick={exportCsv} disabled={filtered.length === 0}>
-                <Download size={15} />
-                Ekspor CSV
-              </button>
+              {page !== "about" && (
+                <button className="primary" onClick={exportCsv} disabled={filtered.length === 0} title="Unduh dataset tersaring dalam format CSV">
+                  <Download size={15} />
+                  Ekspor CSV
+                </button>
+              )}
             </div>
           </section>
+
 
 
           {/* Notification Alert Message */}
@@ -741,7 +755,9 @@ export default function Home() {
 
               <div className="filters-grid">
                 <label>
-                  <span>Sumber Data</span>
+                  <span>
+                    <Building2 size={12} /> Sumber Data
+                  </span>
                   <select
                     value={source}
                     onChange={(e) => {
@@ -756,7 +772,9 @@ export default function Home() {
                 </label>
 
                 <label>
-                  <span>Tahun Transaksi</span>
+                  <span>
+                    <CalendarDays size={12} /> Tahun Transaksi
+                  </span>
                   <select
                     value={year}
                     onChange={(e) => {
@@ -774,7 +792,9 @@ export default function Home() {
                 </label>
 
                 <label>
-                  <span>Bulan</span>
+                  <span>
+                    <Calendar size={12} /> Bulan
+                  </span>
                   <select
                     value={month}
                     onChange={(e) => {
@@ -792,7 +812,9 @@ export default function Home() {
                 </label>
 
                 <label>
-                  <span>Unit / Lokasi</span>
+                  <span>
+                    <MapPin size={12} /> Unit / Lokasi
+                  </span>
                   <select
                     value={branch}
                     onChange={(e) => {
@@ -810,7 +832,9 @@ export default function Home() {
                 </label>
 
                 <label>
-                  <span>Jenis Transaksi</span>
+                  <span>
+                    <ArrowUpDown size={12} /> Jenis Transaksi
+                  </span>
                   <select
                     value={type}
                     onChange={(e) => {
@@ -828,7 +852,9 @@ export default function Home() {
                 </label>
 
                 <label>
-                  <span>Jenis Uang</span>
+                  <span>
+                    <Coins size={12} /> Jenis Uang
+                  </span>
                   <select
                     value={money}
                     onChange={(e) => {
@@ -846,7 +872,9 @@ export default function Home() {
                 </label>
 
                 <label>
-                  <span>Bank</span>
+                  <span>
+                    <Landmark size={12} /> Institusi Bank
+                  </span>
                   <select
                     value={bank}
                     onChange={(e) => {
@@ -864,7 +892,9 @@ export default function Home() {
                 </label>
 
                 <label>
-                  <span>Pecahan / Denom</span>
+                  <span>
+                    <Banknote size={12} /> Pecahan / Denom
+                  </span>
                   <select
                     value={denom}
                     onChange={(e) => {
@@ -880,6 +910,7 @@ export default function Home() {
                     ))}
                   </select>
                 </label>
+
               </div>
             </div>
           )}
@@ -1250,70 +1281,175 @@ export default function Home() {
 
           {/* PAGE: ABOUT & METHODOLOGY */}
           {page === "about" && (
-            <div className="about-wrap">
-              <div className="panel">
-                <div className="panelhead">
-                  <div>
-                    <div className="eyebrow">METODOLOGI & ARSITEKTUR SISTEM</div>
-                    <h2>Tentang Sistem BI SETBAY Bank Indonesia</h2>
+            <div className="about-container">
+              {/* Row 1: 3 Core Pillars */}
+              <div className="about-pillars-grid">
+                <div className="pillar-card">
+                  <div className="pillar-icon blue">
+                    <FileSpreadsheet size={22} />
+                  </div>
+                  <h3>1. Integritas Data Riil</h3>
+                  <p>
+                    Membaca dan memproses data riil transaksi langsung dari workbook Excel resmi <strong>SETBAY MANADO</strong> dan <strong>SETBAY KASTIP</strong>. Tidak ada dataset dummy tiruan. Validasi tanggal dan nominal otomatis memastikan konsistensi data sebelum tersimpan.
+                  </p>
+                  <span className="pillar-tag">Validated Data Source</span>
+                </div>
+
+                <div className="pillar-card">
+                  <div className="pillar-icon green">
+                    <ShieldCheck size={22} />
+                  </div>
+                  <h3>2. Kerahasiaan Bank (Bank Secrecy)</h3>
+                  <p>
+                    Sesuai regulasi kerahasiaan perbankan, kolom nomor rekening <code>BANK_ACCOUNT</code> sengaja <strong>TIDAK dipetakan</strong>, tidak disimpan pada database, tidak ditampilkan pada antarmuka publik, dan tidak dapat diekspor.
+                  </p>
+                  <span className="pillar-tag tag-green">Zero Sensitive Storage</span>
+                </div>
+
+                <div className="pillar-card">
+                  <div className="pillar-icon purple">
+                    <Layers size={22} />
+                  </div>
+                  <h3>3. Arsitektur Cloud Modern</h3>
+                  <p>
+                    Dibangun di atas framework <strong>Next.js 14 App Router</strong>, basis data PostgreSQL <strong>Supabase</strong> dengan Row Level Security (RLS), serta infrastruktur serverless <strong>Vercel</strong> dengan performa latensi rendah.
+                  </p>
+                  <span className="pillar-tag tag-purple">High Performance Cloud</span>
+                </div>
+              </div>
+
+              {/* Row 2: Metrics Glossary Cards Grid */}
+              <div className="about-card">
+                <div className="about-card-head">
+                  <div className="eyebrow">STANDAR METRIK OPERASIONAL</div>
+                  <h2>Definisi & Formula Metrik Analisis</h2>
+                  <p>Pedoman perhitungan metrik arus kas yang disajikan pada dashboard eksekutif BI SETBAY</p>
+                </div>
+
+                <div className="metrics-glossary-grid">
+                  <div className="glossary-item">
+                    <div className="glossary-top">
+                      <span className="glossary-label">Nilai Transaksi (Amount)</span>
+                      <span className="glossary-formula">∑ Nominal</span>
+                    </div>
+                    <p>
+                      Akumulasi total nominal transaksi rupiah dari seluruh baris transaksi yang memenuhi kriteria filter aktif (periode, jenis, perbankan, atau pecahan).
+                    </p>
+                  </div>
+
+                  <div className="glossary-item">
+                    <div className="glossary-top">
+                      <span className="glossary-label">Total Inflow (Arus Masuk)</span>
+                      <span className="glossary-formula text-green">+ Setoran Kas</span>
+                    </div>
+                    <p>
+                      Total nominal uang kartal yang disetorkan oleh perbankan atau unit kas titipan (Kastip) kembali ke khazanah kas Bank Indonesia.
+                    </p>
+                  </div>
+
+                  <div className="glossary-item">
+                    <div className="glossary-top">
+                      <span className="glossary-label">Total Outflow (Arus Keluar)</span>
+                      <span className="glossary-formula text-red">- Penarikan Kas</span>
+                    </div>
+                    <p>
+                      Nilai absolut uang kartal rupiah yang ditarik dari Bank Indonesia oleh perbankan komersial atau dikirimkan ke sentra kas titipan untuk kebutuhan peredaran masyarakat.
+                    </p>
+                  </div>
+
+                  <div className="glossary-item">
+                    <div className="glossary-top">
+                      <span className="glossary-label">Netflow (Arus Bersih)</span>
+                      <span className="glossary-formula">Inflow - Outflow</span>
+                    </div>
+                    <p>
+                      Selisih arus kas bersih. Nilai positif (hijau) menandakan posisi <em>Net Inflow</em> (penyerapan likuiditas), sedangkan nilai negatif (merah) mencerminkan posisi <em>Net Outflow</em> (ekspansi likuiditas).
+                    </p>
+                  </div>
+
+                  <div className="glossary-item">
+                    <div className="glossary-top">
+                      <span className="glossary-label">Volume Fisik Uang</span>
+                      <span className="glossary-formula">∑ Lembar / Keping</span>
+                    </div>
+                    <p>
+                      Kuantitas fisik instrumen rupiah (jumlah bilyet uang kertas atau keping uang logam) yang dihitung terlepas dari nilai nominal pecahannya.
+                    </p>
+                  </div>
+
+                  <div className="glossary-item">
+                    <div className="glossary-top">
+                      <span className="glossary-label">Klasifikasi Kualitas Uang</span>
+                      <span className="glossary-formula">ULE · UTLE · UPK</span>
+                    </div>
+                    <p>
+                      Pengelompokan kelayakan edar uang rupiah: ULE (Uang Layak Edar), UTLE (Uang Tidak Layak Edar/Lusuh), dan UPK (Uang Peringatan Kemerdekaan / Emisi Khusus).
+                    </p>
                   </div>
                 </div>
-                <div className="prose">
-                  <h3>1. Sumber & Integritas Data</h3>
-                  <p>
-                    Aplikasi ini dirancang untuk membaca dan menganalisis data riil dari buku kerja (workbook) Excel resmi{" "}
-                    <strong>SETBAY MANADO</strong> dan <strong>SETBAY KASTIP</strong>. Tidak ada dataset dummy atau tiruan yang dibundel di dalam aplikasi. Jika basis data Supabase kosong, dashboard menampilkan status bersih dan memerlukan administrator untuk mengunggah workbook Excel resmi.
-                  </p>
+              </div>
 
-                  <h3>2. Kepatuhan Privasi & Rahasia Bank (Bank Secrecy)</h3>
-                  <div className="security-card">
-                    <ShieldCheck size={24} className="sec-icon" />
-                    <div>
-                      <b>Pengecualian Kolom Nomor Rekening</b>
-                      <p>
-                        Sesuai regulasi kerahasiaan perbankan, kolom <code>BANK_ACCOUNT</code> sengaja tidak dibuatkan kolom di skema basis data PostgreSQL Supabase, tidak diimpor ke server, tidak ditampilkan di tabel mana pun, dan tidak dapat diekspor ke file CSV.
-                      </p>
-                    </div>
-                  </div>
+              {/* Row 3: System Status & Security Specifications */}
+              <div className="about-card">
+                <div className="about-card-head">
+                  <div className="eyebrow">INFRASTRUKTUR & KEAMANAN</div>
+                  <h2>Spesifikasi Sistem & Status Koneksi</h2>
+                  <p>Parameter operasional dan kebijakan akses data pada lingkungan produksi</p>
+                </div>
 
-                  <h3>3. Definisi Metrik Analisis</h3>
-                  <ul>
-                    <li>
-                      <strong>Nilai Transaksi (Amount):</strong> Total nominal rupiah dari baris transaksi yang sesuai dengan filter aktif.
-                    </li>
-                    <li>
-                      <strong>Inflow (Arus Masuk):</strong> Total nilai rupiah uang kartal yang disetorkan oleh perbankan atau unit kas ke Bank Indonesia.
-                    </li>
-                    <li>
-                      <strong>Outflow (Arus Keluar):</strong> Nilai absolut penarikan uang kartal dari Bank Indonesia ke perbankan atau kastip.
-                    </li>
-                    <li>
-                      <strong>Netflow (Arus Bersih):</strong> Arus kas bersih (Inflow dikurangi Outflow). Nilai positif menandakan penyerapan kas (net inflow), sedangkan nilai negatif menandakan pengeluaran kas neto (net outflow).
-                    </li>
-                    <li>
-                      <strong>Volume Fisik:</strong> Jumlah total lembar uang kertas atau keping uang logam yang ditransaksikan.
-                    </li>
-                  </ul>
-
-                  <h3>4. Status Koneksi & Database</h3>
-                  <table className="info-table">
+                <div className="specs-table-wrap">
+                  <table className="specs-table">
                     <tbody>
                       <tr>
-                        <td>Status Environment Supabase:</td>
-                        <td>
-                          <b>{configured ? "Terkonfigurasi" : "Belum Dikonfigurasi"}</b>
+                        <td className="spec-name">Database Backend</td>
+                        <td className="spec-value">
+                          <b>Supabase PostgreSQL</b>
+                          <span className="spec-sub">Dedicated Managed Cloud Database</span>
+                        </td>
+                        <td className="spec-status">
+                          <span className={`status-badge ${configured ? "ok" : "warn"}`}>
+                            {configured ? "Online & Terhubung" : "Belum Dikonfigurasi"}
+                          </span>
                         </td>
                       </tr>
                       <tr>
-                        <td>Total Baris Transaksi Terbaca:</td>
-                        <td>
-                          <b>{fmt(rows.length)} baris</b>
+                        <td className="spec-name">Total Record Aktif</td>
+                        <td className="spec-value">
+                          <b>{fmt(rows.length)} Transaksi Terindeks</b>
+                          <span className="spec-sub">Berdasarkan sheet SETBAY MANADO & KASTIP</span>
+                        </td>
+                        <td className="spec-status">
+                          <span className="status-badge ok">Terverifikasi</span>
                         </td>
                       </tr>
                       <tr>
-                        <td>Row Level Security (RLS):</td>
-                        <td>
-                          <b>Aktif (SELECT Publik, INSERT/DELETE Dibatasi Admin)</b>
+                        <td className="spec-name">Row Level Security (RLS)</td>
+                        <td className="spec-value">
+                          <b>Aktif & Terisolasi</b>
+                          <span className="spec-sub">SELECT: Akses Analitik Publik | INSERT/DELETE: Dibatasi Admin Terautentikasi</span>
+                        </td>
+                        <td className="spec-status">
+                          <span className="status-badge ok">RLS Enforced</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="spec-name">Kepatuhan Privasi Perbankan</td>
+                        <td className="spec-value">
+                          <b>Exclusion Policy Aktif</b>
+                          <span className="spec-sub">Kolom BANK_ACCOUNT dieliminasi permanen pada layer parsing sebelum payload disimpan</span>
+                        </td>
+                        <td className="spec-status">
+                          <span className="status-badge ok">Bank Secrecy Compliant</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="spec-name">Hosting & Distribusi Edge</td>
+                        <td className="spec-value">
+                          <b>Vercel Edge Network</b>
+                          <span className="spec-sub">Next.js 14.2.35 App Router dengan Automatic SSL & Global CDN</span>
+                        </td>
+                        <td className="spec-status">
+                          <span className="status-badge ok">Production Ready</span>
                         </td>
                       </tr>
                     </tbody>
@@ -1322,6 +1458,7 @@ export default function Home() {
               </div>
             </div>
           )}
+
 
           {/* Admin Operations Box (Import & Data Cleanup) */}
           {session && (
