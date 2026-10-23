@@ -697,35 +697,50 @@ export default function Home() {
     about: ["Tentang Sistem & Metodologi", "Kepatuhan privasi kerahasiaan perbankan, struktur data, dan panduan operasional."],
   };
 
+  const shortPageName =
+    page === "overview"
+      ? "Dashboard"
+      : page === "transactions"
+      ? "Transaksi"
+      : page === "breakdown"
+      ? "Rincian"
+      : "Tentang";
+
   return (
     <div className="shell">
-      {/* Mobile Header */}
+      {/* Mobile Header (Matching SIAP KAS layout) */}
       <div className="mobile-header">
-        <button
-          className="icon-btn mobile-menu-toggle"
-          aria-label="Toggle menu"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-        <div className="brand-mobile">
-          <div className="brandmark">
-            <Image src="/logo-bi.png" alt="Logo Bank Indonesia" width={32} height={32} priority className="brand-logo-img" />
+        <div className="mobile-header-left">
+          <button
+            className="icon-btn mobile-menu-toggle"
+            aria-label="Toggle menu"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <div className="mobile-crumb">
+            <span>Workspace</span>
+            <span className="crumb-sep">/</span>
+            <b>{shortPageName}</b>
           </div>
-          <div className="brand-mobile-txt">
-            <b>BI SETBAY</b>
-            <small>Sulawesi Utara</small>
-          </div>
+          <span
+            className={`mobile-status-dot ${configured ? "ok" : "warn"}`}
+            title={configured ? "Data Supabase Terhubung" : "Supabase Belum Dikonfigurasi"}
+          >
+            <span className="dot-inner" />
+          </span>
         </div>
-        <div className="mobile-header-actions">
+
+        <div className="mobile-header-right">
           {session ? (
-            <button className="mobile-action-btn" onClick={handleSignOut} title="Keluar">
-              <LogOut size={16} />
+            <button className="mobile-admin-btn" onClick={handleSignOut} title="Keluar">
+              <LogOut size={14} />
+              <span>Keluar</span>
             </button>
           ) : (
-            <Link href="/login" className="mobile-login-pill" title="Masuk Admin">
-              <LogIn size={13} />
-              <span>Login</span>
+            <Link href="/login" className="mobile-admin-btn" title="Masuk Admin">
+              <Lock size={14} />
+              <span>Login Admin</span>
             </Link>
           )}
         </div>
