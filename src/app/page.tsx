@@ -104,6 +104,83 @@ const compact = (n: number) => {
   return fmt(n);
 };
 
+// Clean and normalize bank names for chart display
+function formatBankName(raw: string): string {
+  if (!raw) return "(Tidak Diketahui)";
+  const trimmed = raw.trim();
+  const upper = trimmed.toUpperCase();
+
+  // Major Indonesian banks normalization
+  if (upper.includes("CENTRAL ASIA") || upper.includes(" BCA")) return "Bank BCA";
+  if (upper.includes("RAKYAT INDONESIA") || upper.includes(" BRI")) return "Bank BRI";
+  if (upper.includes("BPD SULUT") || upper.includes("SULUTGO") || upper.includes("SULUT GORONTALO")) return "Bank SulutGo";
+  if (upper.includes("NEGARA INDONESIA") || upper.includes(" BNI")) return "Bank BNI";
+  if (upper.includes("MANDIRI")) return "Bank Mandiri";
+  if (upper.includes("DANAMON")) return "Bank Danamon";
+  if (upper.includes("CIMB NIAGA") || upper.includes("CIMB")) return "Bank CIMB Niaga";
+  if (upper.includes("PERMATA")) return "Bank Permata";
+  if (upper.includes("TABUNGAN NEGARA") || upper.includes(" BTN")) return "Bank BTN";
+  if (upper.includes("PANIN")) return "Bank Panin";
+  if (upper.includes("MEGA")) return "Bank Mega";
+  if (upper.includes("SYARIAH INDONESIA") || upper.includes(" BSI")) return "Bank BSI";
+  if (upper.includes("MAYBANK") || upper.includes("BII")) return "Bank Maybank";
+  if (upper.includes("SINARMAS")) return "Bank Sinarmas";
+  if (upper.includes("OCBC")) return "Bank OCBC NISP";
+  if (upper.includes("NOBU")) return "Bank Nobu";
+  if (upper.includes("ARTHA GRAHA")) return "Bank Artha Graha";
+  if (upper.includes("MUAMALAT")) return "Bank Muamalat";
+  if (upper.includes("BCA SYARIAH")) return "BCA Syariah";
+  if (upper.includes("BTPN")) return "Bank BTPN";
+  if (upper.includes("BUKOPIN") || upper.includes("KB BUKOPIN")) return "KB Bukopin";
+  if (upper.includes("BJB") || upper.includes("JABAR BANTEN")) return "Bank BJB";
+  if (upper.includes("JATIM")) return "Bank Jatim";
+  if (upper.includes("JATENG")) return "Bank Jateng";
+
+  // Clean fallback: strip legal company notations
+  let clean = trimmed
+    .replace(/^PT\.?\s+/i, "")
+    .replace(/,\s*TBK\.?/gi, "")
+    .replace(/\s*\(PERSERO\)/gi, "")
+    .replace(/\s*TBK\.?/gi, "")
+    .trim();
+
+  return clean.length > 18 ? clean.slice(0, 16) + "…" : clean;
+}
+
+// Custom Bank Tooltip
+function BankChartTooltip({ active, payload }: any) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bank-chart-tooltip">
+        <div className="bank-chart-tooltip-header">
+          <strong>{data.fullName}</strong>
+          <span className="bank-chart-tooltip-badge">{data.name}</span>
+        </div>
+        <div className="bank-chart-tooltip-body">
+          <div className="bank-tooltip-row green">
+            <span className="bank-tooltip-label">
+              <span className="color-indicator green"></span> Inflow (Setoran):
+            </span>
+            <span className="bank-tooltip-val">{rup(data.inflow)}</span>
+          </div>
+          <div className="bank-tooltip-row red">
+            <span className="bank-tooltip-label">
+              <span className="color-indicator red"></span> Outflow (Penarikan):
+            </span>
+            <span className="bank-tooltip-val">{rup(data.outflow)}</span>
+          </div>
+          <div className="bank-tooltip-row total">
+            <span className="bank-tooltip-label">Total Volume:</span>
+            <span className="bank-tooltip-val">{rup(data.total)}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
 // Group helper
 function group(rows: Tx[], key: keyof Tx) {
   const m = new Map<
@@ -168,6 +245,9 @@ export default function Home() {
   const [bank, setBank] = useState("all");
   const [denom, setDenom] = useState("all");
   const [query, setQuery] = useState("");
+
+  // Top Bank Metric Sort Filter ("both" = dual bars, "inflow", "outflow")
+  const [bankSortMetric, setBankSortMetric] = useState<"both" | "inflow" | "outflow">("both");
 
   // Table pagination & sorting
   const [pageNo, setPageNo] = useState(1);
@@ -343,18 +423,32 @@ export default function Home() {
     }));
   }, [filtered]);
 
-  // Top Banks Chart Data
+  // Top Banks Chart Data with dynamic sorting & clean bank names
   const topBanksData = useMemo(() => {
-    return group(filtered, "bank_name")
-      .slice(0, 8)
-      .map((r) => ({
-        name: r.name.length > 20 ? r.name.slice(0, 19) + "…" : r.name,
+    const list = group(filtered, "bank_name").map((r) => {
+      const inflow = Math.max(0, r.inflow);
+      const outflow = Math.abs(r.outflow);
+      const total = inflow + outflow;
+      return {
+        name: formatBankName(r.name),
         fullName: r.name,
-        nilai: r.amount,
-        inflow: r.inflow,
-        outflow: Math.abs(r.outflow),
-      }));
-  }, [filtered]);
+        inflow,
+        outflow,
+        total,
+        nilai: bankSortMetric === "inflow" ? inflow : bankSortMetric === "outflow" ? outflow : total,
+      };
+    });
+
+    if (bankSortMetric === "inflow") {
+      list.sort((a, b) => b.inflow - a.inflow);
+    } else if (bankSortMetric === "outflow") {
+      list.sort((a, b) => b.outflow - a.outflow);
+    } else {
+      list.sort((a, b) => b.total - a.total);
+    }
+
+    return list.slice(0, 8);
+  }, [filtered, bankSortMetric]);
 
   // Denomination Chart Data
   const denomData = useMemo(() => {
@@ -1079,33 +1173,106 @@ export default function Home() {
               <div className="grid2">
                 <Panel
                   eyebrow="PERFORMA PERBANKAN"
-                  title="Top 8 Bank Berdasarkan Nilai Transaksi"
-                  desc="Institusi perbankan dengan volume nominal setoran & bayaran terbesar"
+                  title={
+                    bankSortMetric === "inflow"
+                      ? "Top 8 Bank Berdasarkan Inflow"
+                      : bankSortMetric === "outflow"
+                      ? "Top 8 Bank Berdasarkan Outflow"
+                      : "Top 8 Bank Berdasarkan Nilai Transaksi"
+                  }
+                  desc={
+                    bankSortMetric === "inflow"
+                      ? "Peringkat 8 bank dengan penerimaan setoran (Inflow) terbesar"
+                      : bankSortMetric === "outflow"
+                      ? "Peringkat 8 bank dengan penarikan uang kartal (Outflow) terbesar"
+                      : "Komparasi Inflow (hijau) & Outflow (merah) pada 8 institusi perbankan teratas"
+                  }
+                  action={
+                    <div className="segmented-control" role="group" aria-label="Sortir performa bank">
+                      <button
+                        type="button"
+                        className={`segment-btn ${bankSortMetric === "both" ? "active" : ""}`}
+                        onClick={() => setBankSortMetric("both")}
+                        title="Tampilkan 2 bar per bank: Inflow dan Outflow"
+                      >
+                        Inflow & Outflow
+                      </button>
+                      <button
+                        type="button"
+                        className={`segment-btn ${bankSortMetric === "inflow" ? "active" : ""}`}
+                        onClick={() => setBankSortMetric("inflow")}
+                        title="Urutkan berdasarkan nilai Inflow terbesar"
+                      >
+                        Inflow
+                      </button>
+                      <button
+                        type="button"
+                        className={`segment-btn ${bankSortMetric === "outflow" ? "active" : ""}`}
+                        onClick={() => setBankSortMetric("outflow")}
+                        title="Urutkan berdasarkan nilai Outflow terbesar"
+                      >
+                        Outflow
+                      </button>
+                    </div>
+                  }
                 >
-                  <div className="chart-container">
+                  <div className="chart-container bank-chart-container">
                     {topBanksData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
+                      <ResponsiveContainer width="100%" height={360}>
                         <BarChart
                           data={topBanksData}
                           layout="vertical"
-                          margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+                          margin={{ top: 8, right: 24, left: 10, bottom: 8 }}
+                          barGap={3}
+                          barCategoryGap={bankSortMetric === "both" ? "18%" : "26%"}
                         >
-                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                          <XAxis type="number" tickFormatter={compact} stroke="#64748b" fontSize={11} />
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                          <XAxis
+                            type="number"
+                            tickFormatter={compact}
+                            stroke="#64748b"
+                            fontSize={11}
+                            axisLine={{ stroke: "#e2e8f0" }}
+                            tickLine={false}
+                          />
                           <YAxis
                             type="category"
                             dataKey="name"
-                            width={130}
-                            stroke="#64748b"
+                            width={115}
+                            stroke="#334155"
                             fontSize={11}
+                            fontWeight={600}
+                            axisLine={{ stroke: "#e2e8f0" }}
+                            tickLine={false}
                           />
-                          <Tooltip
-                            formatter={(v: any, _name: any, item: any) => [
-                              rup(Number(v)),
-                              item.payload.fullName,
-                            ]}
-                          />
-                          <Bar dataKey="nilai" name="Nilai Transaksi" fill="#1d4ed8" radius={[0, 4, 4, 0]} />
+                          <Tooltip content={<BankChartTooltip />} />
+                          {bankSortMetric === "both" && (
+                            <Legend
+                              verticalAlign="bottom"
+                              align="center"
+                              iconType="circle"
+                              iconSize={8}
+                              wrapperStyle={{ paddingTop: "12px", fontSize: "12px", fontWeight: 600 }}
+                            />
+                          )}
+                          {(bankSortMetric === "both" || bankSortMetric === "inflow") && (
+                            <Bar
+                              dataKey="inflow"
+                              name="Inflow (Setoran)"
+                              fill="#059669"
+                              radius={[0, 4, 4, 0]}
+                              barSize={bankSortMetric === "both" ? 11 : 18}
+                            />
+                          )}
+                          {(bankSortMetric === "both" || bankSortMetric === "outflow") && (
+                            <Bar
+                              dataKey="outflow"
+                              name="Outflow (Penarikan)"
+                              fill="#dc2626"
+                              radius={[0, 4, 4, 0]}
+                              barSize={bankSortMetric === "both" ? 11 : 18}
+                            />
+                          )}
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1121,21 +1288,21 @@ export default function Home() {
                 >
                   <div className="chart-container">
                     {denomData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
+                      <ResponsiveContainer width="100%" height={360}>
                         <BarChart
                           data={denomData}
-                          margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                          margin={{ top: 8, right: 10, left: 0, bottom: 8 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                          <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
-                          <YAxis tickFormatter={compact} width={65} stroke="#64748b" fontSize={11} />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis dataKey="name" stroke="#64748b" fontSize={11} axisLine={{ stroke: "#e2e8f0" }} tickLine={false} />
+                          <YAxis tickFormatter={compact} width={65} stroke="#64748b" fontSize={11} axisLine={{ stroke: "#e2e8f0" }} tickLine={false} />
                           <Tooltip
                             formatter={(v: any, _name: any, item: any) => [
                               `${rup(Number(v))} (${fmt(item.payload.pieces)} lembar/keping)`,
                               "Nominal",
                             ]}
                           />
-                          <Bar dataKey="nilai" name="Nominal (Rp)" fill="#d97706" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="nilai" name="Nominal (Rp)" fill="#d97706" radius={[4, 4, 0, 0]} barSize={22} />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1519,21 +1686,24 @@ function Panel({
   eyebrow,
   title,
   desc,
+  action,
   children,
 }: {
   eyebrow: string;
   title: string;
   desc?: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <section className="panel">
       <div className="panelhead">
-        <div>
+        <div className="paneltitle-wrap">
           <div className="eyebrow">{eyebrow}</div>
           <h2>{title}</h2>
           {desc && <p className="paneldesc">{desc}</p>}
         </div>
+        {action && <div className="panelaction">{action}</div>}
       </div>
       <div className="panelbody">{children}</div>
     </section>

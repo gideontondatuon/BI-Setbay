@@ -966,8 +966,24 @@ button:disabled {
 }
 
 .panelhead {
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid #f8fafc;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.paneltitle-wrap {
+  flex: 1;
+  min-width: 220px;
+}
+
+.panelaction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .panelhead h2 {
@@ -983,13 +999,147 @@ button:disabled {
   margin-top: 2px;
 }
 
+/* Segmented Control Filter */
+.segmented-control {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  gap: 2px;
+}
+
+.segment-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.segment-btn:hover {
+  color: var(--primary-navy);
+}
+
+.segment-btn.active {
+  background: #ffffff;
+  color: var(--primary-blue);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Custom Bank Chart Tooltip */
+.bank-chart-tooltip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  min-width: 230px;
+  pointer-events: none;
+}
+
+.bank-chart-tooltip-header {
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.bank-chart-tooltip-header strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-navy);
+  line-height: 1.35;
+}
+
+.bank-chart-tooltip-badge {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #0369a1;
+  background: #e0f2fe;
+  padding: 1px 7px;
+  border-radius: 4px;
+}
+
+.bank-chart-tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bank-tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.bank-tooltip-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.color-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.color-indicator.green {
+  background: #059669;
+}
+
+.color-indicator.red {
+  background: #dc2626;
+}
+
+.bank-tooltip-val {
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  font-size: 11.5px;
+}
+
+.bank-tooltip-row.green .bank-tooltip-val {
+  color: #059669;
+}
+
+.bank-tooltip-row.red .bank-tooltip-val {
+  color: #dc2626;
+}
+
+.bank-tooltip-row.total {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.bank-tooltip-row.total .bank-tooltip-val {
+  color: var(--primary-navy);
+  font-weight: 700;
+}
+
 .panelbody {
   padding: 16px 24px 24px;
 }
 
 .chart-container {
   width: 100%;
-  min-height: 290px;
+  min-height: 350px;
 }
 
 .empty-chart {
