@@ -1178,14 +1178,14 @@ export default function Home() {
                       ? "Top 8 Bank Berdasarkan Inflow"
                       : bankSortMetric === "outflow"
                       ? "Top 8 Bank Berdasarkan Outflow"
-                      : "Top 8 Bank Berdasarkan Nilai Transaksi"
+                      : "Top 8 Bank Berdasarkan Total Transaksi"
                   }
                   desc={
                     bankSortMetric === "inflow"
                       ? "Peringkat 8 bank dengan penerimaan setoran (Inflow) terbesar"
                       : bankSortMetric === "outflow"
                       ? "Peringkat 8 bank dengan penarikan uang kartal (Outflow) terbesar"
-                      : "Komparasi Inflow (hijau) & Outflow (merah) pada 8 institusi perbankan teratas"
+                      : "Komparasi 2 bar: Inflow (hijau) & Outflow (merah) pada 8 institusi perbankan teratas"
                   }
                   action={
                     <div className="segmented-control" role="group" aria-label="Sortir performa bank">
@@ -1193,9 +1193,9 @@ export default function Home() {
                         type="button"
                         className={`segment-btn ${bankSortMetric === "both" ? "active" : ""}`}
                         onClick={() => setBankSortMetric("both")}
-                        title="Tampilkan 2 bar per bank: Inflow dan Outflow"
+                        title="Tampilkan 2 bar per bank: Inflow dan Outflow berdasarkan Total Transaksi"
                       >
-                        Inflow & Outflow
+                        Total Transaksi
                       </button>
                       <button
                         type="button"
