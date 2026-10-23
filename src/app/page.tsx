@@ -804,20 +804,9 @@ export default function Home() {
           </button>
         </nav>
 
-        <div className="sidefoot">
-          <div className="avatar">{session ? "AD" : "BI"}</div>
-          <div className="sideuser">
-            <b>{session ? session.user?.email?.split("@")[0] || "Admin" : "Akses Publik"}</b>
-            <small>{session ? "Administrator" : "Mode Penampil"}</small>
-          </div>
-          {!session && (
-            <Link href="/login" className="side-login-btn" title="Masuk Admin">
-              <Lock size={14} />
-            </Link>
-          )}
-        </div>
-        <div className="side-version-tag">
-          <small>BI SETBAY · v1.0</small>
+        <div className="side-simple-footer">
+          <span>BI SETBAY</span>
+          <span>v1.0</span>
         </div>
 
       </aside>
@@ -1749,16 +1738,15 @@ export default function Home() {
             </div>
           )}
 
-          {/* Professional Footer */}
-          <footer className="footer">
-            <p>
-              BI SETBAY · Sistem Business Intelligence Setoran & Bayaran Bank Indonesia · Supabase PostgreSQL + Vercel
-            </p>
-            <small>
-              {loading
-                ? "Memuat data dari Supabase..."
-                : `${fmt(rows.length)} baris transaksi tersimpan · ${fmt(filtered.length)} baris tersaring`}
-            </small>
+          {/* Dashboard Simple Footer (matching SIAP KAS) */}
+          <footer className="dashboard-simple-footer">
+            <div className="footer-left">
+              &copy; 2026 BI SETBAY - Dashboard Analisis Setoran &amp; Bayaran
+            </div>
+            <div className="footer-right">
+              <ShieldCheck size={14} />
+              <span>Sistem informasi internal</span>
+            </div>
           </footer>
         </div>
       </main>

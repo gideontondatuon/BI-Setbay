@@ -514,65 +514,53 @@ button:disabled {
   font-weight: 700;
 }
 
-.sidefoot {
+/* Sidebar Bottom Footer (matching SIAP KAS) */
+.side-simple-footer {
   margin-top: auto;
   border-top: 1px solid var(--border-light);
-  padding-top: 18px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #eff6ff;
-  color: var(--primary-blue);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 12px;
-  border: 1px solid #bfdbfe;
-  flex-shrink: 0;
-}
-
-.sideuser {
-  flex: 1;
-  min-width: 0;
-}
-
-.sideuser b {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-main);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sideuser small {
-  display: block;
+  justify-content: space-between;
   font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.side-simple-footer span:first-child {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Dashboard Bottom Footer (matching SIAP KAS) */
+.dashboard-simple-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0 16px 0;
+  margin-top: 36px;
+  border-top: 1px solid var(--border-light);
+  font-size: 12px;
   color: var(--text-muted);
 }
 
-.side-login-btn {
-  color: var(--primary-blue);
-  padding: 8px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #eff6ff;
-  text-decoration: none;
-  transition: all 0.15s ease;
+.dashboard-simple-footer .footer-left {
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
-.side-login-btn:hover {
-  background: #dbeafe;
+.dashboard-simple-footer .footer-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.dashboard-simple-footer .footer-right svg {
+  color: var(--text-dim);
 }
 
 /* Main Workspace */
@@ -2373,6 +2361,15 @@ td {
 
   .spec-name {
     width: 110px;
+  }
+
+  .dashboard-simple-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px 0 12px 0;
+    margin-top: 24px;
+    font-size: 11px;
   }
 }
 
