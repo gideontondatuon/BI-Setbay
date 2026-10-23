@@ -59,7 +59,7 @@ import {
 import * as XLSX from "xlsx";
 
 import { Tx } from "@/lib/types";
-import { parseSheet } from "@/lib/excel";
+import { parseSheet, num } from "@/lib/excel";
 
 const CHART_COLORS = [
   "#1d4ed8", // deep royal blue
@@ -282,7 +282,19 @@ export default function Home() {
         if (error) throw error;
         if (!data || data.length === 0) break;
 
-        allRecords = allRecords.concat(data as Tx[]);
+        // Ensure pieces is accurately populated even if existing records in database stored 0
+        const normalizedData = (data as Tx[]).map((r) => {
+          let pieces = r.pieces || 0;
+          if (pieces === 0 && r.amount && r.denom) {
+            const denomNum = num(r.denom);
+            if (denomNum > 0) {
+              pieces = Math.round(r.amount / denomNum);
+            }
+          }
+          return { ...r, pieces };
+        });
+
+        allRecords = allRecords.concat(normalizedData);
         if (data.length < step) break;
         from += step;
       }

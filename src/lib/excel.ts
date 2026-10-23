@@ -93,8 +93,14 @@ export function parseSheet(book: XLSX.WorkBook, targetSheetPattern: string): Tx[
 
   return rawRows
     .map((r) => {
+      // Normalize row keys by trimming leading/trailing whitespace (e.g. ' COTCP_PIECES' -> 'COTCP_PIECES')
+      const cleanRow: Record<string, any> = {};
+      for (const [key, val] of Object.entries(r)) {
+        cleanRow[key.trim()] = val;
+      }
+
       const rawDate = getField(
-        r,
+        cleanRow,
         "COTC_TRAN_DATE",
         "TRAN_DATE",
         "TRAN_TRANSACTION_DATE",
@@ -104,42 +110,52 @@ export function parseSheet(book: XLSX.WorkBook, targetSheetPattern: string): Tx[
       const parsedDate = dateStr(rawDate);
 
       const transaction_type = norm(
-        getField(r, "TRANSACTION_TYPE", "TRAN_TYPE", "JENIS_TRANSAKSI", "TYPE")
+        getField(cleanRow, "TRANSACTION_TYPE", "TRAN_TYPE", "JENIS_TRANSAKSI", "TYPE")
       );
       const money_type = norm(
-        getField(r, "MONEY_TYPE", "JENIS_UANG", "KAT_UANG")
+        getField(cleanRow, "MONEY_TYPE", "JENIS_UANG", "KAT_UANG")
       );
       const bank_name = norm(
-        getField(r, "BANK_NAME", "NAMA_BANK", "BANK")
+        getField(cleanRow, "BANK_NAME", "NAMA_BANK", "BANK")
       );
 
       const branch_name = isKastip
-        ? norm(getField(r, "Nama Kastip", "NAMA_KASTIP", "KASTIP", "CABANG", "LOKASI")) || "Kastip"
+        ? norm(getField(cleanRow, "Nama Kastip", "NAMA_KASTIP", "KASTIP", "CABANG", "LOKASI")) || "Kastip"
         : "Manado";
 
       const denom = norm(
-        getField(r, "Denom", "DENOM", "DENOMINASI", "PECAHAN")
+        getField(cleanRow, "Denom", "DENOM", "DENOMINASI", "PECAHAN")
       );
 
-      const pieces = isKastip
-        ? num(getField(r, "COTCR_PIECES", "COTCP_PIECES", "PIECES", "LEMBAR"))
-        : num(getField(r, "COTCP_PIECES", "COTCR_PIECES", "PIECES", "LEMBAR"));
-
       const amount = isKastip
-        ? num(getField(r, "COTCR_AMOUNT", "COTCP_AMOUNT", "AMOUNT", "NOMINAL", "NILAI"))
-        : num(getField(r, "COTCP_AMOUNT", "COTCR_AMOUNT", "AMOUNT", "NOMINAL", "NILAI"));
+        ? num(getField(cleanRow, "COTCR_AMOUNT", "COTCP_AMOUNT", "AMOUNT", "NOMINAL", "NILAI"))
+        : num(getField(cleanRow, "COTCP_AMOUNT", "COTCR_AMOUNT", "AMOUNT", "NOMINAL", "NILAI"));
+
+      // Volume / Pieces:
+      // Diambil spesifik dari COTCR_PIECES untuk SETBAY KASTIP dan COTCP_PIECES untuk SETBAY MANADO
+      let pieces = isKastip
+        ? num(getField(cleanRow, "COTCR_PIECES", "COTCP_PIECES", "PIECES", "LEMBAR", "VOLUME"))
+        : num(getField(cleanRow, "COTCP_PIECES", "COTCR_PIECES", "PIECES", "LEMBAR", "VOLUME"));
+
+      // Fallback akurat: jika pieces belum terisi namun amount dan denom tersedia (misal Rp 2.000.000.000 / 100.000 = 20.000 lbr)
+      if (pieces === 0 && amount > 0 && denom) {
+        const denomNum = num(denom);
+        if (denomNum > 0) {
+          pieces = Math.round(amount / denomNum);
+        }
+      }
 
       const inflow = isKastip
-        ? num(getField(r, "Inflow Kastip", "Inflow", "INFLOW", "ARUS_MASUK"))
-        : num(getField(r, "Inflow", "INFLOW", "ARUS_MASUK"));
+        ? num(getField(cleanRow, "Inflow Kastip", "Inflow", "INFLOW", "ARUS_MASUK"))
+        : num(getField(cleanRow, "Inflow", "INFLOW", "ARUS_MASUK"));
 
       const outflow = isKastip
-        ? num(getField(r, "Outflow Kastip", "Outflow Kasti", "Outflow", "OUTFLOW", "ARUS_KELUAR"))
-        : num(getField(r, "Outflow", "OUTFLOW", "ARUS_KELUAR"));
+        ? num(getField(cleanRow, "Outflow Kastip", "Outflow Kasti", "Outflow", "OUTFLOW", "ARUS_KELUAR"))
+        : num(getField(cleanRow, "Outflow", "OUTFLOW", "ARUS_KELUAR"));
 
       const netflow = isKastip
-        ? num(getField(r, "Netflow Kastip", "Netflow", "Neflow", "NETFLOW"))
-        : num(getField(r, "Netflow", "Neflow", "NETFLOW"));
+        ? num(getField(cleanRow, "Netflow Kastip", "Netflow", "Neflow", "NETFLOW"))
+        : num(getField(cleanRow, "Netflow", "Neflow", "NETFLOW"));
 
       return {
         source: officialSource,
