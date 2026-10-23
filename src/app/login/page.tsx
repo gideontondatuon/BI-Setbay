@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase, configured } from "@/lib/supabase";
 import { ArrowLeft, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff } from "lucide-react";
 
@@ -66,7 +67,9 @@ export default function LoginPage() {
       <div className="login-brand-panel">
         <div className="brand-panel-content">
           <div className="brand-header">
-            <div className="brand-badge">BI</div>
+            <div className="brand-badge">
+              <Image src="/logo-bi.png" alt="Logo Bank Indonesia" width={40} height={40} priority className="login-bi-logo" />
+            </div>
             <div className="brand-title">
               <h3>Dashboard Cashflow SETBAY</h3>
               <p>Pengelolaan Uang Rupiah</p>

@@ -11,6 +11,11 @@ const fontSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "BI SETBAY | Dashboard Analisis Setoran & Bayaran Bank Indonesia",
   description: "Executive Business Intelligence Dashboard untuk analisis transaksi riil SETBAY MANADO dan SETBAY KASTIP.",
+  icons: {
+    icon: "/logo-bi.png",
+    shortcut: "/logo-bi.png",
+    apple: "/logo-bi.png",
+  },
 };
 
 export const viewport: Viewport = {

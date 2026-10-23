@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, ChangeEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import { supabase, configured } from "@/lib/supabase";
 
@@ -680,32 +681,64 @@ export default function Home() {
 
   return (
     <div className="shell">
-      {/* Mobile Header Toggle */}
+      {/* Mobile Header */}
       <div className="mobile-header">
         <button
-          className="icon-btn"
+          className="icon-btn mobile-menu-toggle"
           aria-label="Toggle menu"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
         <div className="brand-mobile">
-          <div className="brandmark">BI</div>
-          <b>BI SETBAY</b>
+          <div className="brandmark">
+            <Image src="/logo-bi.png" alt="Logo Bank Indonesia" width={32} height={32} priority className="brand-logo-img" />
+          </div>
+          <div className="brand-mobile-txt">
+            <b>BI SETBAY</b>
+            <small>Sulawesi Utara</small>
+          </div>
         </div>
-        <div className="status-dot-wrap">
-          <span className={`status-dot ${configured ? "ok" : "warn"}`} />
+        <div className="mobile-header-actions">
+          {session ? (
+            <button className="mobile-action-btn" onClick={handleSignOut} title="Keluar">
+              <LogOut size={16} />
+            </button>
+          ) : (
+            <Link href="/login" className="mobile-login-pill" title="Masuk Admin">
+              <LogIn size={13} />
+              <span>Login</span>
+            </Link>
+          )}
         </div>
       </div>
+
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-label="Tutup navigasi"
+        />
+      )}
 
       {/* Sidebar Navigation */}
       <aside className={`sidebar ${mobileMenuOpen ? "open" : ""}`}>
         <div className="brand">
-          <div className="brandmark">BI</div>
+          <div className="brandmark">
+            <Image src="/logo-bi.png" alt="Logo Bank Indonesia" width={38} height={38} priority className="brand-logo-img" />
+          </div>
           <div className="brandtxt">
             <b>BI SETBAY</b>
             <small>Analisis Setoran & Bayaran</small>
           </div>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Tutup menu"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         <div className="navlabel">MENU DASHBOARD</div>
