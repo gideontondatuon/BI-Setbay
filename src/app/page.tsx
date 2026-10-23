@@ -719,8 +719,9 @@ export default function Home() {
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           <div className="mobile-crumb">
-            <span>Workspace</span>
-            <span className="crumb-sep">/</span>
+            <span className="crumb-workspace">
+              Workspace <span className="crumb-sep">/</span>
+            </span>
             <b>{shortPageName}</b>
           </div>
           <span
