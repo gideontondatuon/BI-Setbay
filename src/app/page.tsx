@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState, ChangeEvent, FormEvent } from "react";
+import { useEffect, useMemo, useState, ChangeEvent } from "react";
+import Link from "next/link";
+
 import { supabase, configured } from "@/lib/supabase";
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -141,9 +144,6 @@ export default function Home() {
 
   // Authentication
   const [session, setSession] = useState<any>(null);
-  const [showLogin, setShowLogin] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   // Navigation
   const [page, setPage] = useState<"overview" | "transactions" | "breakdown" | "about">("overview");
@@ -406,27 +406,6 @@ export default function Home() {
     setPageNo(1);
   }
 
-  // Auth: Sign In
-  async function handleSignIn(e: FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setMsg(null);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (error) throw error;
-      setSession(data.session);
-      setShowLogin(false);
-      setMsg({ type: "success", text: "Login administrator berhasil." });
-    } catch (err: any) {
-      setMsg({ type: "error", text: "Login gagal: " + (err.message || String(err)) });
-    } finally {
-      setBusy(false);
-    }
-  }
-
   // Auth: Sign Out
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -669,7 +648,13 @@ export default function Home() {
             <b>{session ? session.user?.email?.split("@")[0] || "Admin" : "Akses Publik"}</b>
             <small>{session ? "Administrator" : "Mode Penampil"}</small>
           </div>
+          {!session && (
+            <Link href="/login" className="side-login-btn" title="Masuk Admin">
+              <LogIn size={15} />
+            </Link>
+          )}
         </div>
+
       </aside>
 
       {/* Main View Area */}
@@ -690,12 +675,9 @@ export default function Home() {
                 <LogOut size={14} /> Keluar
               </button>
             ) : (
-              <button
-                className="outline btn-sm"
-                onClick={() => setShowLogin(!showLogin)}
-              >
+              <Link href="/login" className="primary btn-sm login-topbar-link">
                 <LogIn size={14} /> Login Admin
-              </button>
+              </Link>
             )}
           </div>
         </header>
@@ -720,54 +702,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Login Form Modal / Box */}
-          {showLogin && !session && (
-            <div className="loginbox">
-              <div className="loginhead">
-                <h3>Login Administrator</h3>
-                <button className="icon-close" onClick={() => setShowLogin(false)}>
-                  <X size={16} />
-                </button>
-              </div>
-              <p>
-                Masuk dengan akun Supabase Authentication untuk hak akses impor file workbook Excel dan manajemen data.
-              </p>
-              <form onSubmit={handleSignIn}>
-                <label>
-                  <span>Email</span>
-                  <input
-                    type="email"
-                    required
-                    placeholder="admin@bi.go.id"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </label>
-                <label>
-                  <span>Password</span>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </label>
-                <div className="loginactions">
-                  <button type="submit" className="primary" disabled={busy}>
-                    {busy ? "Memproses..." : "Masuk"}
-                  </button>
-                  <button
-                    type="button"
-                    className="outline"
-                    onClick={() => setShowLogin(false)}
-                  >
-                    Batal
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
 
           {/* Notification Alert Message */}
           {msg && (
