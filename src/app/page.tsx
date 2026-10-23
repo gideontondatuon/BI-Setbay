@@ -41,6 +41,10 @@ import {
   Menu,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  SlidersHorizontal,
+  Lock,
   TrendingUp,
   TrendingDown,
   Layers,
@@ -246,6 +250,7 @@ export default function Home() {
   const [bank, setBank] = useState("all");
   const [denom, setDenom] = useState("all");
   const [query, setQuery] = useState("");
+  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
 
   // Top Bank Metric Sort Filter ("both" = dual bars, "inflow", "outflow")
   const [bankSortMetric, setBankSortMetric] = useState<"both" | "inflow" | "outflow">("both");
@@ -255,6 +260,19 @@ export default function Home() {
   const [pageSize, setPageSize] = useState(25);
   const [sortField, setSortField] = useState<keyof Tx>("transaction_date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // Filter status indicators
+  const hasAdvancedFilterActive = branch !== "all" || type !== "all" || money !== "all" || denom !== "all";
+  const activeFilterCount = [
+    source !== "all",
+    year !== "all",
+    month !== "all",
+    bank !== "all",
+    branch !== "all",
+    type !== "all",
+    money !== "all",
+    denom !== "all",
+  ].filter(Boolean).length;
 
   // Fetch all transactions handling PostgREST 1000-row limit pagination
   async function loadData() {
@@ -741,7 +759,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="navlabel">MENU DASHBOARD</div>
+        <div className="navlabel">MENU UTAMA</div>
         <nav className="navlist">
           <button
             className={`navbtn ${page === "overview" ? "active" : ""}`}
@@ -751,7 +769,7 @@ export default function Home() {
             }}
           >
             <LayoutDashboard size={18} />
-            <span>Dashboard Utama</span>
+            <span>Dashboard</span>
           </button>
           <button
             className={`navbtn ${page === "transactions" ? "active" : ""}`}
@@ -794,9 +812,12 @@ export default function Home() {
           </div>
           {!session && (
             <Link href="/login" className="side-login-btn" title="Masuk Admin">
-              <LogIn size={15} />
+              <Lock size={14} />
             </Link>
           )}
+        </div>
+        <div className="side-version-tag">
+          <small>BI SETBAY · v1.0</small>
         </div>
 
       </aside>
@@ -806,7 +827,7 @@ export default function Home() {
         {/* Top Header Bar */}
         <header className="topbar">
           <div className="crumb">
-            <span>Bank Indonesia</span>
+            <span>Workspace</span>
             <span className="crumb-sep">/</span>
             <b>{pageTitles[page][0]}</b>
           </div>
@@ -815,39 +836,39 @@ export default function Home() {
               <i />
               {configured
                 ? rows.length > 0
-                  ? `Supabase Terkoneksi · ${fmt(rows.length)} baris`
-                  : "Supabase Terkoneksi"
+                  ? `Data publik Supabase terhubung · ${fmt(rows.length)} baris`
+                  : "Data publik Supabase terhubung"
                 : "Supabase Belum Disetel"}
             </span>
 
             {session ? (
               <button className="outline btn-sm" onClick={handleSignOut}>
-                <LogOut size={14} /> Keluar
+                <LogOut size={13} /> Keluar
               </button>
             ) : (
               <Link href="/login" className="primary btn-sm login-topbar-link">
-                <LogIn size={14} /> Login Admin
+                <Lock size={13} /> Login Admin
               </Link>
             )}
           </div>
         </header>
 
         <div className="content">
-          {/* Hero Banner */}
+          {/* Hero Header (Minimalist sitting cleanly on canvas matching Image 2) */}
           <section className="hero">
             <div className="hero-text">
-              <div className="eyebrow">BANK INDONESIA · SISTEM INFORMASI SETBAY</div>
+              <div className="eyebrow">SISTEM INFORMASI SETORAN &amp; BAYARAN · BI SETBAY</div>
               <h1>{pageTitles[page][0]}</h1>
-              <p>{pageTitles[page][1]}</p>
+              <p>{pageTitles[page][1]} · Provinsi Sulawesi Utara</p>
             </div>
             <div className="heroactions">
-              <button className="outline" onClick={loadData} disabled={loading || busy} title="Perbarui data dari Supabase">
-                <RefreshCw size={15} className={loading ? "spin" : ""} />
+              <button className="outline btn-sm" onClick={loadData} disabled={loading || busy} title="Perbarui data dari Supabase">
+                <RefreshCw size={13} className={loading ? "spin" : ""} />
                 Muat Ulang
               </button>
               {page !== "about" && (
-                <button className="primary" onClick={exportCsv} disabled={filtered.length === 0} title="Unduh dataset tersaring dalam format CSV">
-                  <Download size={15} />
+                <button className="primary btn-sm" onClick={exportCsv} disabled={filtered.length === 0} title="Unduh dataset tersaring dalam format CSV">
+                  <Download size={13} />
                   Ekspor CSV
                 </button>
               )}
@@ -869,52 +890,143 @@ export default function Home() {
             </div>
           )}
 
-          {/* Active Filter Bar (shown on Overview, Transactions, Breakdown) */}
-          {page !== "about" && (
-            <div className="filters-card">
-              <div className="filters-header">
-                <div className="filters-title">
-                  <Filter size={15} />
-                  <b>Filter Analitik Terintegrasi</b>
+          {/* PAGE: OVERVIEW - Executive KPI Cards (Sitting directly below Hero, matching Image 2 SIAP KAS) */}
+          {page === "overview" && (
+            <div className="kpis-grid">
+              <div className="kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-icon blue">
+                    <Banknote size={20} />
+                  </span>
                 </div>
-                {(source !== "all" ||
-                  year !== "all" ||
-                  month !== "all" ||
-                  branch !== "all" ||
-                  type !== "all" ||
-                  money !== "all" ||
-                  bank !== "all" ||
-                  denom !== "all" ||
-                  query !== "") && (
-                  <button className="btn-text-danger" onClick={resetFilters}>
-                    <X size={13} /> Reset Semua Filter
-                  </button>
-                )}
+                <div className="kpi-label">Nilai Transaksi Terakumulasi</div>
+                <div className="kpi-val">{compact(totalAmount)}</div>
+                <div className="kpi-sub">{rup(totalAmount)}</div>
               </div>
 
-              <div className="filters-grid">
-                <label>
-                  <span>
-                    <Building2 size={12} /> Sumber Data
+              <div className="kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-icon green">
+                    <TrendingUp size={20} />
                   </span>
+                </div>
+                <div className="kpi-label">Total Arus Masuk (Inflow)</div>
+                <div className="kpi-val">{compact(totalInflow)}</div>
+                <div className="kpi-sub">{rup(totalInflow)}</div>
+              </div>
+
+              <div className="kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-icon red">
+                    <TrendingDown size={20} />
+                  </span>
+                </div>
+                <div className="kpi-label">Total Arus Keluar (Outflow)</div>
+                <div className="kpi-val">{compact(totalOutflow)}</div>
+                <div className="kpi-sub">{rup(totalOutflow)}</div>
+              </div>
+
+              <div className="kpi-card kpi-card-highlight">
+                <div className="kpi-top">
+                  <span className={`kpi-icon ${totalNetflow >= 0 ? "green" : "red"}`}>
+                    {totalNetflow >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
+                  </span>
+                </div>
+                <div className="kpi-label">Arus Bersih (Netflow)</div>
+                <div className={`kpi-val ${totalNetflow < 0 ? "negative" : "positive"}`}>
+                  {compact(totalNetflow)}
+                </div>
+                <div className="kpi-sub">{rup(totalNetflow)}</div>
+                <div className="kpi-active-indicator" />
+              </div>
+
+              <div className="kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-icon purple">
+                    <Layers size={20} />
+                  </span>
+                </div>
+                <div className="kpi-label">Volume Fisik Uang</div>
+                <div className="kpi-val">{compact(totalPieces)}</div>
+                <div className="kpi-sub">{fmt(totalPieces)} lembar/keping</div>
+              </div>
+
+              <div className="kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-icon amber">
+                    <FileSpreadsheet size={20} />
+                  </span>
+                </div>
+                <div className="kpi-label">Total Baris Catatan</div>
+                <div className="kpi-val">{fmt(filtered.length)}</div>
+                <div className="kpi-sub">
+                  {filtered.length > 0
+                    ? `${filtered[0]?.transaction_date} (Terbaru)`
+                    : "Belum ada transaksi"}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Minimalist Filter Bar (Shown on Overview, Transactions, Breakdown) */}
+          {page !== "about" && (
+            <div className="filters-card-minimal">
+              <div className="filters-topbar">
+                <div className="filters-title-group">
+                  <SlidersHorizontal size={14} className="filters-icon" />
+                  <span className="filters-title-text">Filter Analitik Terintegrasi</span>
+                  <span className="filters-count-pill">{fmt(filtered.length)} baris</span>
+                  {activeFilterCount > 0 && (
+                    <span className="filters-active-badge">{activeFilterCount} filter aktif</span>
+                  )}
+                </div>
+
+                <div className="filters-actions-group">
+                  <button
+                    type="button"
+                    className={`btn-toggle-advanced ${advancedFiltersOpen || hasAdvancedFilterActive ? "active" : ""}`}
+                    onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
+                    title="Buka atau tutup filter lanjutan (Unit/Lokasi, Jenis Transaksi, Jenis Uang, Pecahan)"
+                  >
+                    <SlidersHorizontal size={12} />
+                    <span>Filter Lanjutan {hasAdvancedFilterActive ? "• Aktif" : "(4)"}</span>
+                    {advancedFiltersOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                  </button>
+
+                  {activeFilterCount > 0 && (
+                    <button className="btn-text-danger" onClick={resetFilters} title="Reset semua filter ke kondisi awal">
+                      <X size={12} /> Reset Filter
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Primary 4 Filters */}
+              <div className="filters-primary-row">
+                <div className="filter-item">
+                  <label htmlFor="filter-source">
+                    <Building2 size={12} /> Sumber Data
+                  </label>
                   <select
+                    id="filter-source"
                     value={source}
                     onChange={(e) => {
                       setSource(e.target.value);
                       setPageNo(1);
                     }}
                   >
-                    <option value="all">Semua Sumber (Manado & Kastip)</option>
+                    <option value="all">Semua Sumber (Manado &amp; Kastip)</option>
                     <option value="SETBAY MANADO">SETBAY MANADO</option>
                     <option value="SETBAY KASTIP">SETBAY KASTIP</option>
                   </select>
-                </label>
+                </div>
 
-                <label>
-                  <span>
+                <div className="filter-item">
+                  <label htmlFor="filter-year">
                     <CalendarDays size={12} /> Tahun Transaksi
-                  </span>
+                  </label>
                   <select
+                    id="filter-year"
                     value={year}
                     onChange={(e) => {
                       setYear(e.target.value);
@@ -928,13 +1040,14 @@ export default function Home() {
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
 
-                <label>
-                  <span>
+                <div className="filter-item">
+                  <label htmlFor="filter-month">
                     <Calendar size={12} /> Bulan
-                  </span>
+                  </label>
                   <select
+                    id="filter-month"
                     value={month}
                     onChange={(e) => {
                       setMonth(e.target.value);
@@ -948,73 +1061,14 @@ export default function Home() {
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
 
-                <label>
-                  <span>
-                    <MapPin size={12} /> Unit / Lokasi
-                  </span>
-                  <select
-                    value={branch}
-                    onChange={(e) => {
-                      setBranch(e.target.value);
-                      setPageNo(1);
-                    }}
-                  >
-                    <option value="all">Semua Unit / Lokasi</option>
-                    {availableBranches.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  <span>
-                    <ArrowUpDown size={12} /> Jenis Transaksi
-                  </span>
-                  <select
-                    value={type}
-                    onChange={(e) => {
-                      setType(e.target.value);
-                      setPageNo(1);
-                    }}
-                  >
-                    <option value="all">Semua Jenis Transaksi</option>
-                    {availableTypes.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  <span>
-                    <Coins size={12} /> Jenis Uang
-                  </span>
-                  <select
-                    value={money}
-                    onChange={(e) => {
-                      setMoney(e.target.value);
-                      setPageNo(1);
-                    }}
-                  >
-                    <option value="all">Semua Jenis Uang (ULE/UTLE/UPK)</option>
-                    {availableMoneys.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  <span>
+                <div className="filter-item">
+                  <label htmlFor="filter-bank">
                     <Landmark size={12} /> Institusi Bank
-                  </span>
+                  </label>
                   <select
+                    id="filter-bank"
                     value={bank}
                     onChange={(e) => {
                       setBank(e.target.value);
@@ -1028,117 +1082,103 @@ export default function Home() {
                       </option>
                     ))}
                   </select>
-                </label>
-
-                <label>
-                  <span>
-                    <Banknote size={12} /> Pecahan / Denom
-                  </span>
-                  <select
-                    value={denom}
-                    onChange={(e) => {
-                      setDenom(e.target.value);
-                      setPageNo(1);
-                    }}
-                  >
-                    <option value="all">Semua Pecahan</option>
-                    {availableDenoms.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
+                </div>
               </div>
+
+              {/* Secondary 4 Filters (Collapsible Tray) */}
+              {(advancedFiltersOpen || hasAdvancedFilterActive) && (
+                <div className="filters-secondary-row">
+                  <div className="filter-item">
+                    <label htmlFor="filter-branch">
+                      <MapPin size={12} /> Unit / Lokasi
+                    </label>
+                    <select
+                      id="filter-branch"
+                      value={branch}
+                      onChange={(e) => {
+                        setBranch(e.target.value);
+                        setPageNo(1);
+                      }}
+                    >
+                      <option value="all">Semua Unit / Lokasi</option>
+                      {availableBranches.map((b) => (
+                        <option key={b} value={b}>
+                          {b}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-item">
+                    <label htmlFor="filter-type">
+                      <ArrowUpDown size={12} /> Jenis Transaksi
+                    </label>
+                    <select
+                      id="filter-type"
+                      value={type}
+                      onChange={(e) => {
+                        setType(e.target.value);
+                        setPageNo(1);
+                      }}
+                    >
+                      <option value="all">Semua Jenis Transaksi</option>
+                      {availableTypes.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-item">
+                    <label htmlFor="filter-money">
+                      <Coins size={12} /> Jenis Uang
+                    </label>
+                    <select
+                      id="filter-money"
+                      value={money}
+                      onChange={(e) => {
+                        setMoney(e.target.value);
+                        setPageNo(1);
+                      }}
+                    >
+                      <option value="all">Semua Jenis Uang (ULE/UTLE/UPK)</option>
+                      {availableMoneys.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-item">
+                    <label htmlFor="filter-denom">
+                      <Banknote size={12} /> Pecahan / Denom
+                    </label>
+                    <select
+                      id="filter-denom"
+                      value={denom}
+                      onChange={(e) => {
+                        setDenom(e.target.value);
+                        setPageNo(1);
+                      }}
+                    >
+                      <option value="all">Semua Pecahan</option>
+                      {availableDenoms.map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* PAGE: OVERVIEW */}
+          {/* PAGE: OVERVIEW CHARTS */}
           {page === "overview" && (
             <>
-              {/* Executive KPI Cards */}
-              <div className="kpis-grid">
-                <div className="kpi-card">
-                  <div className="kpi-top">
-                    <span className="kpi-icon blue">
-                      <Banknote size={20} />
-                    </span>
-                    <span className="tag">Total Transaksi</span>
-                  </div>
-                  <div className="kpi-label">Nilai Transaksi Terakumulasi</div>
-                  <div className="kpi-val">{compact(totalAmount)}</div>
-                  <div className="kpi-sub">{rup(totalAmount)}</div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-top">
-                    <span className="kpi-icon green">
-                      <TrendingUp size={20} />
-                    </span>
-                    <span className="tag tag-green">Inflow (Masuk)</span>
-                  </div>
-                  <div className="kpi-label">Total Arus Masuk</div>
-                  <div className="kpi-val">{compact(totalInflow)}</div>
-                  <div className="kpi-sub">{rup(totalInflow)}</div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-top">
-                    <span className="kpi-icon red">
-                      <TrendingDown size={20} />
-                    </span>
-                    <span className="tag tag-red">Outflow (Keluar)</span>
-                  </div>
-                  <div className="kpi-label">Total Arus Keluar</div>
-                  <div className="kpi-val">{compact(totalOutflow)}</div>
-                  <div className="kpi-sub">{rup(totalOutflow)}</div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-top">
-                    <span className={`kpi-icon ${totalNetflow >= 0 ? "green" : "red"}`}>
-                      {totalNetflow >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-                    </span>
-                    <span className={`tag ${totalNetflow >= 0 ? "tag-green" : "tag-red"}`}>
-                      {totalNetflow >= 0 ? "Net Inflow" : "Net Outflow"}
-                    </span>
-                  </div>
-                  <div className="kpi-label">Arus Bersih (Netflow)</div>
-                  <div className={`kpi-val ${totalNetflow < 0 ? "negative" : "positive"}`}>
-                    {compact(totalNetflow)}
-                  </div>
-                  <div className="kpi-sub">{rup(totalNetflow)}</div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-top">
-                    <span className="kpi-icon purple">
-                      <Layers size={20} />
-                    </span>
-                    <span className="tag">Volume Fisik</span>
-                  </div>
-                  <div className="kpi-label">Jumlah Lembar / Keping</div>
-                  <div className="kpi-val">{compact(totalPieces)}</div>
-                  <div className="kpi-sub">{fmt(totalPieces)} lembar/keping</div>
-                </div>
-
-                <div className="kpi-card">
-                  <div className="kpi-top">
-                    <span className="kpi-icon amber">
-                      <FileSpreadsheet size={20} />
-                    </span>
-                    <span className="tag">Data Riil</span>
-                  </div>
-                  <div className="kpi-label">Total Baris Catatan</div>
-                  <div className="kpi-val">{fmt(filtered.length)}</div>
-                  <div className="kpi-sub">
-                    {filtered.length > 0
-                      ? `${filtered[0]?.transaction_date} (Terbaru)`
-                      : "Belum ada transaksi"}
-                  </div>
-                </div>
-              </div>
 
               {/* Charts Section: Row 1 */}
               <div className="grid2">
@@ -1834,7 +1874,15 @@ function TxTable({
                 <span className="type-badge">{r.transaction_type || "—"}</span>
               </td>
               <td className="bank-col" title={r.bank_name}>
-                {r.bank_name || "—"}
+                <div className="bank-cell">
+                  <span className="bank-badge-initial">
+                    {r.bank_name?.startsWith("PT") ? "PT" : (r.bank_name ? r.bank_name.slice(0, 3).toUpperCase() : "BK")}
+                  </span>
+                  <div className="bank-meta">
+                    <span className="bank-name-text">{r.bank_name || "—"}</span>
+                    <span className="bank-name-sub">Provinsi Sulawesi Utara</span>
+                  </div>
+                </div>
               </td>
               <td>{r.branch_name || "—"}</td>
               <td>

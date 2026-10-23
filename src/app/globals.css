@@ -747,40 +747,42 @@ button:disabled {
   margin: 0 auto;
 }
 
-/* Hero Banner */
+/* Hero Banner (SIAP KAS Flat Canvas Style) */
 .hero {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
-  border: 1px solid #dbeafe;
-  border-radius: var(--radius-xl);
-  padding: 28px 32px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 4px 0 20px 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-  box-shadow: var(--shadow-sm);
+  gap: 20px;
+  margin-bottom: 20px;
+  box-shadow: none;
 }
 
 .eyebrow {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.12em;
   color: var(--primary-blue);
   text-transform: uppercase;
+  margin-bottom: 6px;
 }
 
 .hero h1 {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
   color: var(--primary-navy);
-  margin: 6px 0 4px;
-  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 .hero p {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 13px;
-  max-width: 680px;
+  max-width: 720px;
 }
 
 .heroactions {
@@ -840,14 +842,159 @@ button:disabled {
   opacity: 1;
 }
 
-/* Filter Card System */
+/* Minimalist Filter Bar System (SIAP KAS style) */
+.filters-card-minimal {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.filters-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filters-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filters-icon {
+  color: var(--primary-blue);
+}
+
+.filters-title-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.filters-count-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.filters-active-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.filters-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-toggle-advanced {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-toggle-advanced:hover {
+  background: #f1f5f9;
+  color: var(--primary-navy);
+  border-color: var(--border-strong);
+}
+
+.btn-toggle-advanced.active {
+  background: #eff6ff;
+  color: var(--primary-blue);
+  border-color: #bfdbfe;
+}
+
+.filters-primary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.filters-secondary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-light);
+  animation: fadeIn 0.2s ease;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  transition: all 0.15s ease;
+}
+
+.filter-item:hover,
+.filter-item:focus-within {
+  background: #ffffff;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(13, 93, 184, 0.08);
+}
+
+.filter-item label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+  cursor: pointer;
+}
+
+.filter-item select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--primary-navy);
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Legacy Filter Card Compatibility */
 .filters-card {
   background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 18px 22px;
+  padding: 16px 20px;
   margin-bottom: 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .filters-header {
@@ -904,7 +1051,7 @@ button:disabled {
   cursor: pointer;
 }
 
-/* Executive KPI Grid */
+/* Executive KPI Grid (SIAP KAS style) */
 .kpis-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -916,28 +1063,31 @@ button:disabled {
   background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 18px 20px;
-  box-shadow: var(--shadow-sm);
+  padding: 20px 22px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: var(--border-strong);
 }
 
 .kpi-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
+  justify-content: flex-start;
+  margin-bottom: 14px;
 }
 
 .kpi-icon {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -963,18 +1113,40 @@ button:disabled {
 .tag-red { background: #fee2e2; color: #b91c1c; }
 
 .kpi-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .kpi-val {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--primary-navy);
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.kpi-val.positive { color: var(--accent-emerald); }
+.kpi-val.negative { color: var(--accent-crimson); }
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Active Highlight Indicator Line (matching Image 2 SIAP KAS 3rd card) */
+.kpi-card-highlight .kpi-active-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-blue);
 }
 
 .kpi-val.positive { color: var(--accent-emerald); }
@@ -1285,16 +1457,17 @@ table {
 thead th {
   position: sticky;
   top: 0;
-  background: #f8fafc;
-  color: var(--text-secondary);
+  background: #0f2b48;
+  color: #ffffff;
   font-weight: 700;
   text-transform: uppercase;
   font-size: 11px;
-  letter-spacing: 0.05em;
-  padding: 12px 14px;
+  letter-spacing: 0.06em;
+  padding: 13px 14px;
   text-align: left;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 2px solid #0a1f33;
   user-select: none;
+  z-index: 10;
 }
 
 th.sortable {
@@ -1302,8 +1475,8 @@ th.sortable {
 }
 
 th.sortable:hover {
-  background: #f1f5f9;
-  color: var(--primary-blue);
+  background: #173b5f;
+  color: #ffffff;
 }
 
 .sort-indicator {
@@ -1312,8 +1485,8 @@ th.sortable:hover {
   vertical-align: middle;
 }
 
-.active-sort { color: var(--primary-blue); }
-.dim-sort { color: var(--text-dim); }
+.active-sort { color: #60a5fa; }
+.dim-sort { color: #94a3b8; }
 
 tbody tr {
   border-bottom: 1px solid #f1f5f9;
@@ -1365,9 +1538,46 @@ td {
 }
 
 .bank-col {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 260px;
+}
+
+.bank-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bank-badge-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f2b48;
+  font-weight: 800;
+  font-size: 11px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.bank-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.bank-name-text {
+  font-weight: 700;
+  color: var(--primary-navy);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.bank-name-sub {
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
 .num-col {
@@ -1961,6 +2171,23 @@ td {
   }
 
   /* Filter Section */
+  .filters-card-minimal {
+    padding: 12px 12px;
+    margin-bottom: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .filters-topbar {
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+
+  .filters-primary-row,
+  .filters-secondary-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
   .filters-card {
     padding: 14px 12px;
     margin-bottom: 14px;
